@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+
+<project name="frequency-cap"
+         default="usage"
+         basedir=".">
+
+  <property environment="env"/>
+
+  <property name="lib" value="${basedir}/lib"/>
+  <property name="build.root" value="${basedir}/build"/>
+
+  <property name="producer.src" value="${basedir}/src"/>
+  <property name="producer.fullname"
+            value="org.softwarematters.storm.echo.KafkaProducer"/>
+  <property name="producer.manifest" value="${basedir}/producer.manifest"/>
+  <property name="producer.jar" value="${lib}/producer.jar"/>
+
+  <property name="topology.src" value="${basedir}/src"/>
+  <property name="topology.fullname"
+            value="org.softwarematters.storm.echo.EchoTopology"/>
+  <property name="topology.manifest" value="${basedir}/topology.manifest"/>
+  <property name="topology.jar" value="${lib}/topology.jar"/>
+
+  <property name="slf4j.lib" value="${env.HOME}/packages/slf4j-1.7.12/"/>
+  <property name="zookeeper.lib"
+            value="${env.HOME}/packages/zookeeper-3.4.6/"/>
+  <property name="kafka.lib"
+            value="${env.HOME}/packages/kafka_2.11-0.8.2.1/libs/"/>
+  <property name="storm.lib"
+            value="${env.HOME}/packages/apache-storm-0.9.5/lib/"/>
+  <property name="storm.kafka.lib"
+            value="${env.HOME}/packages/apache-storm-0.9.5/external/storm-kafka/"/>
+
+  <path id="master-classpath">
+    <fileset dir="${slf4j.lib}">
+      <include name="slf4j-api-1.7.12.jar"/>
+      <include name="slf4j-simple-1.7.12.jar"/>
+    </fileset>
+
+    <fileset dir="${kafka.lib}">
+      <include name="*.jar"/>
+    </fileset>
+
+    <fileset dir="${storm.lib}">
+      <include name="*.jar"/>
+    </fileset>
+
+    <fileset dir="${storm.kafka.lib}">
+      <include name="storm-kafka-0.9.5.jar"/>
+    </fileset>
+  </path>
+
+  <target name="usage">
+    <echo level="info">
+Available targets are:
+  build    Build project in current directory.
+  clean    Remove all generated files and directories.
+  rebuild  Clean and build.
+
+  Project name = ${ant.project.name}
+  Java home = ${env.JAVA_HOME}
+    </echo>
+  </target>
+
+  <target name="make-build-dirs">
+    <mkdir dir="${build.root}"/>
+    <mkdir dir="${lib}"/>
+  </target>
+
+  <!--
+      These targets are necessary to allow fixed paths in the manifest files.
+  -->
+  <pathconvert property="manifest.classpath"
+               refid="master-classpath"
+               pathsep=" "
+               dirsep="/"/>
+
+  <target name="make-producer-manifest">
+    <echo file="${producer.manifest}" append="false">
+Main-Class: ${producer.fullname}
+Class-Path: ${manifest.classpath}
+    </echo>
+    <!--
+      Clean up the output from echo while keeping the above lines easy
+      to edit.
+    -->
+    <replaceregexp file="${producer.manifest}"
+                   flags="m"
+                   match="^\n"
+                   replace=""/>
+    <replaceregexp file="${producer.manifest}"
+                   flags="gm"
+                   byline="true"
+                   match="^\s+"
+                   replace=""/>
+  </target>
+
+  <target name="build"
+          depends="make-build-dirs,make-producer-manifest">
+
+    <!-- Build the producer. -->
+
+    <javac source="1.7" target="1.7"
+           srcdir="${producer.src}" destdir="${build.root}">
+      <classpath refid="master-classpath"/>
+    </javac>
+    <jar basedir="${build.root}"
+         manifest="${producer.manifest}"
+         jarfile="${producer.jar}"/>
+
+    <!-- Build the topology. -->
+    
+    <javac source="1.7" target="1.7"
+           srcdir="${topology.src}" destdir="${build.root}">
+    </javac>
+
+    <jar basedir="${build.root}"
+         jarfile="${topology.jar}">
+      <manifest>
+        <attribute name="Main-Class" value="${topology.fullname}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.root}" quiet="true"/>
+    <delete dir="${lib}" quiet="true"/>
+
+    <delete file="${producer.manifest}" quiet="true"/>
+
+    <delete quiet="true">
+      <fileset dir="." includes="**/*.class"/>
+    </delete>
+  </target>
+
+  <target name="rebuild" depends="clean,build"/>
+</project>
