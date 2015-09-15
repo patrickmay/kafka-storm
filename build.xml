@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="frequency-cap"
+<project name="storm-kafka-echo"
          default="usage"
          basedir=".">
 
