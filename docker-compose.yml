@@ -25,20 +25,20 @@ kafka2:
   links:
    - zk
 nimbus:
-  image: patrickmay/storm:with-kafka-jars
+  image: patrickmay/storm:0.9.5-jessie
   ports:
    - "6627:6627"
   command: /usr/local/apache-storm/bin/storm nimbus
   links:
    - zk
 supervisor:
-  image: patrickmay/storm:with-kafka-jars
+  image: patrickmay/storm:0.9.5-jessie
   command: /usr/local/apache-storm/bin/storm supervisor
   links:
    - zk
    - nimbus
 stormui:
-  image: patrickmay/storm:with-kafka-jars
+  image: patrickmay/storm:0.9.5-jessie
   ports:
    - "9090:8080"
   command: /usr/local/apache-storm/bin/storm ui

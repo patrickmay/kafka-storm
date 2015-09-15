@@ -8,6 +8,8 @@
 
   <property name="lib" value="${basedir}/lib"/>
   <property name="build.root" value="${basedir}/build"/>
+  <property name="build.staging" value="${basedir}/staging"/>
+  <property name="staging.jar" value="${build.staging}/dependencies.jar"/>
 
   <property name="producer.src" value="${basedir}/src"/>
   <property name="producer.fullname"
@@ -63,8 +65,9 @@ Available targets are:
   </target>
 
   <target name="make-build-dirs">
-    <mkdir dir="${build.root}"/>
     <mkdir dir="${lib}"/>
+    <mkdir dir="${build.root}"/>
+    <mkdir dir="${build.staging}"/>
   </target>
 
   <!--
@@ -95,8 +98,32 @@ Class-Path: ${manifest.classpath}
                    replace=""/>
   </target>
 
+  <target name="staging">
+    <copy todir="${build.staging}">
+      <fileset dir="${kafka.lib}">
+        <include name="kafka-clients-0.8.2.1.jar"/>
+        <include name="kafka_2.11-0.8.2.1.jar"/>
+        <include name="log4j-1.2.16.jar"/>
+        <include name="metrics-core-2.2.0.jar"/>
+        <include name="scala-library-2.11.5.jar"/>
+      </fileset>
+
+      <fileset dir="${storm.kafka.lib}">
+        <include name="storm-kafka-0.9.5.jar"/>
+      </fileset>
+
+      <fileset dir="${zookeeper.lib}">
+        <include name="zookeeper-3.4.6.jar"/>
+      </fileset>
+    </copy>
+
+    <jar jarfile="${staging.jar}">
+      <zipgroupfileset dir="${build.staging}" includes="**/*.jar"/>
+    </jar>
+  </target>
+  
   <target name="build"
-          depends="make-build-dirs,make-producer-manifest">
+          depends="make-build-dirs,make-producer-manifest,staging">
 
     <!-- Build the producer. -->
 
@@ -119,12 +146,15 @@ Class-Path: ${manifest.classpath}
       <manifest>
         <attribute name="Main-Class" value="${topology.fullname}"/>
       </manifest>
+      
+      <zipfileset src="${staging.jar}" excludes="META-INF/**/*"/>
     </jar>
   </target>
 
   <target name="clean">
-    <delete dir="${build.root}" quiet="true"/>
     <delete dir="${lib}" quiet="true"/>
+    <delete dir="${build.root}" quiet="true"/>
+    <delete dir="${build.staging}" quiet="true"/>
 
     <delete file="${producer.manifest}" quiet="true"/>
 
