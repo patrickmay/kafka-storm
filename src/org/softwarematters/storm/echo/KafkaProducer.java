@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 public class KafkaProducer
 {
-  // TO DO: replace with properties
   private static final String MESSAGE_TOPIC = "test.echo";
 
   private static Logger logger_ = LoggerFactory.getLogger(KafkaProducer.class);

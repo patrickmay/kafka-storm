@@ -1,31 +1,25 @@
-This is a simple Storm topology that reads from Kafka and echos the
-messages.
+## Overview
 
-## Test Infrastructure
-```
-docker-machine start default
-docker-compose up
-docker-compose ps
-```
+This is the simplest possible Storm topology that integrates with Kafka.  It consists of a single spout to read from Kafka and a single bolt that echos the message that is read.  The output ends up in the Storm worker log file.
 
-## Kafka
-List topics:
-```
-~/packages/kafka_2.11-0.8.2.1/bin/kafka-topics.sh --zookeeper docker-machine --list
-```
-Create topic:
-```
-~/packages/kafka_2.11-0.8.2.1/bin/kafka-topics.sh --create --zookeeper docker-machine --replication-factor 2 --partitions 3 --topic test.echo
-```
-Describe topic:
-```
-~/packages/kafka_2.11-0.8.2.1/bin/kafka-topics.sh --zookeeper docker-machine --describe --topic test.echo
-```
+A simple producer based on [the Kafka examples](TODO) is included.
+
+## Docker
+
+This example is configured to run in Docker on OS X with an ```/etc/hosts``` entry for ```docker-machine``` (see [this blog post](TODO) for more details on configuring this environment).  If it is running on a different configuration, the files ```bin/deploy-topology.sh``` and ```docker-config.yml``` must be modified to specify the correct Nimbus host and Kafka hosts, respectively.
 
 ## Build
-```
-ant build
-```
-```
-ant rebuild
-```
+
+The example depends on SLF4J, Zookeeper, Kafka, and Storm.  The directories for those packages are specified in ```build.properties```.  These must be set correctly for the build to succeed.
+
+To build the jar files the first time, run ```ant build```.  To clean and build, run ```ant rebuild```.  This will create jar files in the ```lib``` directory.
+
+## Run
+
+If Docker is being used to run the example, the first step is to start the Docker containers running Zookeeper, Kafka, and Storm.  When Kafka and Storm are available, deploy the topology then feed messages to Kafka:
+
+1. ```docker-compose up &``` (if using Docker)
+2. ```bin/deploy-topology.sh```
+3. ```bin/feed-kafka.sh```
+
+By default the feed script sends a thousand messages.  They will be found in the Storm worker log file.

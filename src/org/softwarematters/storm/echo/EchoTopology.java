@@ -49,7 +49,6 @@ public class EchoTopology
                         MESSAGE_TOPIC,
                         "/" + MESSAGE_TOPIC,
                         UUID.randomUUID().toString());
-    //    spoutConfig.forceStartOffsetTime(-1);
     spoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
     spoutConfig.forceFromStart = true;
     
