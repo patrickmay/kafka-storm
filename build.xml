@@ -67,6 +67,11 @@ Available targets are:
 
   <target name="staging">
     <copy todir="${build.staging}">
+      <fileset dir="${slf4j.lib}">
+        <include name="slf4j-api-1.7.12.jar"/>
+        <include name="slf4j-simple-1.7.12.jar"/>
+      </fileset>
+    
       <fileset dir="${kafka.lib}">
         <include name="kafka-clients-0.8.2.1.jar"/>
         <include name="kafka_2.11-0.8.2.1.jar"/>
